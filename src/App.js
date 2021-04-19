@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, Card, CardContent, CircularProgress, Grid, Step, StepLabel, Stepper, TextField, Select } from "@material-ui/core";
-import { Field, Form, Formik, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { Field, Form, Formik } from "formik";
 import "./App.css";
 import FormikControl from "./components/FormikControl";
 import ageFromDOB from "./utils/ageFromDOB";
@@ -16,83 +15,25 @@ import {
   ForwardStyleOptions,
   FootballOptions
 } from "./constants";
+import { validationSchema1, validationSchema2, validationSchema3 } from "./validations/data";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { saveData } from "./actions";
 
 const sleep = (time) => new Promise((acc) => setTimeout(acc, time));
 
-const validationSchema1 = Yup.object({
-  // firstName: Yup.string().required("Required"),
-  // lastName: Yup.string().required("Required"),
-  // email: Yup.string().email("Invalid Email format.").required("Required"),
-  // psw: Yup.string().required("Required"),
-  // country: Yup.string().required("Required"),
-  sport: Yup.string().required("Required")
-});
-const validationSchema2 = Yup.object({
-  role: Yup.string().required("Role is Required"),
-  bowling_style: Yup.array().when(["role"], {
-    is: (role) => role === "bowler" || role === "all-rounder",
-    then: Yup.array().min(1, "Select atleast one bowling style.")
-  }),
-  batting_style: Yup.array().when(["role"], {
-    is: (role) => role === "batsmen" || role === "wicket-keeper" || role === "all-rounder",
-    then: Yup.array().min(1, "Select atleast one batting style.")
-  }),
-  defender_style: Yup.string().when(["role"], {
-    is: (role) => role === "defender",
-    then: Yup.string().required("Select one defending style.")
-  }),
-  midfielder_style: Yup.string().when(["role"], {
-    is: (role) => role === "mid-fielder",
-    then: Yup.string().required("Select one mid-fielding style.")
-  }),
-  forward_style: Yup.string().when(["role"], {
-    is: (role) => role === "forward",
-    then: Yup.string().required("Select one forward style.")
-  })
-});
-const validationSchema3 = Yup.object({
-  profile: Yup.string().test("len", "Profile must be greater than 20 characters", (val) => val?.length >= 20)
-});
+const onSubmit = async (values) => {
+  await sleep(3000);
+  alert(JSON.stringify(values, null, 2));
+};
 
 export default function Home() {
-  const initialValues = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    psw: "",
-    country: "",
-    sport: "",
-    dob: new Date().getTime(),
-    matchesPlayed: 0,
-    role: "",
-    batting_style: [],
-    bowling_style: [],
-    defender_style: "",
-    midfielder_style: "",
-    forward_style: "",
-    profile: "",
-    runs: "",
-    hundreds: "",
-    batting_average: "",
-    wickets: "",
-    bowling_average: "",
-    hattricks: "",
-    goals: "",
-    assists: "",
-    passes: "",
-    interceptions: "",
-    goals_saved: ""
-  };
-  const onSubmit = async (values) => {
-    await sleep(3000);
-    alert(JSON.stringify(values, null, 2));
-  };
-  const [formData, setFormData] = useState(initialValues);
+  const initialValues = useSelector((state) => state.data);
 
   return (
     <Card>
       <CardContent>
-        <FormikStepper initialValues={initialValues} onSubmit={onSubmit} setFormData={setFormData}>
+        <FormikStepper initialValues={initialValues} onSubmit={onSubmit}>
           <FormikStep label="Step 1" validationSchema={validationSchema1}>
             <FormikControl name="firstName" type="text" label="First Name" />
 
@@ -248,6 +189,7 @@ export function FormikStepper({ children, ...props }) {
   const [step, setStep] = useState(0);
   const currentChild = childrenArray[step];
   const [completed, setCompleted] = useState(false);
+  const dispatch = useDispatch();
 
   function isLastStep() {
     return step === childrenArray.length - 1;
@@ -258,7 +200,8 @@ export function FormikStepper({ children, ...props }) {
       {...props}
       validationSchema={currentChild.props.validationSchema}
       onSubmit={async (values) => {
-        props.setFormData({ values });
+        console.log({ values });
+        dispatch(saveData({ data: values }));
         if (isLastStep()) {
           await props.onSubmit(values);
           setCompleted(true);
