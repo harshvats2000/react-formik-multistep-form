@@ -20,11 +20,11 @@ import {
 const sleep = (time) => new Promise((acc) => setTimeout(acc, time));
 
 const validationSchema1 = Yup.object({
-  firstName: Yup.string().required("Required"),
-  lastName: Yup.string().required("Required"),
-  email: Yup.string().email("Invalid Email format.").required("Required"),
-  psw: Yup.string().required("Required"),
-  country: Yup.string().required("Required"),
+  // firstName: Yup.string().required("Required"),
+  // lastName: Yup.string().required("Required"),
+  // email: Yup.string().email("Invalid Email format.").required("Required"),
+  // psw: Yup.string().required("Required"),
+  // country: Yup.string().required("Required"),
   sport: Yup.string().required("Required")
 });
 const validationSchema2 = Yup.object({
@@ -36,6 +36,18 @@ const validationSchema2 = Yup.object({
   batting_style: Yup.array().when(["role"], {
     is: (role) => role === "batsmen" || role === "wicket-keeper" || role === "all-rounder",
     then: Yup.array().min(1, "Select atleast one batting style.")
+  }),
+  defender_style: Yup.string().when(["role"], {
+    is: (role) => role === "defender",
+    then: Yup.string().required("Select one defending style.")
+  }),
+  midfielder_style: Yup.string().when(["role"], {
+    is: (role) => role === "mid-fielder",
+    then: Yup.string().required("Select one mid-fielding style.")
+  }),
+  forward_style: Yup.string().when(["role"], {
+    is: (role) => role === "forward",
+    then: Yup.string().required("Select one forward style.")
   })
 });
 const validationSchema3 = Yup.object({
